@@ -7,10 +7,6 @@ helmDefaults:
   timeout: 600
   force: true
 
-environments:
-  dev:
-    values: []
-    
 releases:
   - name: test-shared-pod-storage
     installed: true

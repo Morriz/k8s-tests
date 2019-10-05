@@ -15,6 +15,35 @@ alias kcg="k config view | grep 'current-context:' | sed -n -e 's/^.*current-con
 alias kcu="k config use-context"
 alias h="helm tiller run tillerless -- helm"
 alias hf="helmfile"
+
+reg=morriz/helmfile:0.82.0
+containerId=helmfile
+test=$(d --version) &> /dev/null
+hasDocker=$?
+
+alias kp="k proxy &"
+alias hf_="d start $containerId && d exec -ti $containerId bash"
+if [ $hasDocker -eq 0 ]; then
+  echo "Found docker binary, will use $reg instead of local helmfile"
+  hasHelmfileContainer=$(d ps -af name=$containerId | grep -w $containerId)
+  if [ "$hasHelmfileContainer" == "" ]; then
+    echo "Running one time init of helmfile container. Please type exit and return."
+    d run -it --name $containerId -v $PWD:$PWD -v ~/.kube:/root/.kube -w $PWD $reg bash
+    d start $containerId && d exec -t $containerId bash -c 'helmfile repos'
+    echo READY!
+  fi
+  function h() { 
+    args="$@"
+    d start $containerId && d exec -ti $containerId sh -c ". bin/aliases && helm tiller run tillerless -- helm $args";
+  }
+  function hf() { 
+    args="$@"
+    d start $containerId && d exec -ti $containerId sh -c "helmfile $args";
+  }
+else
+  alias h="helm tiller run tillerless -- helm"
+  alias hf="helmfile"
+fi  
 alias hk="h delete --purge"
 alias kk="killall kubectl"
 
@@ -22,6 +51,6 @@ function kpk() { ps aux|grep "$@" | awk '{print $2}' | xargs kill; }
 function kad() { k delete "$@" --all; }
 function kcns() { k config set-context $(k config current-context) --namespace="$@"; }
 
-function hfd() { kcu dev.k8s.essent.nl && hf -e dev $@ --concurrency=1 --skip-deps; }
+function hfd() { hf $@ --concurrency=1 --skip-deps; }
 
 echo "Aliases loaded."
