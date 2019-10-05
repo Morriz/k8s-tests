@@ -8,12 +8,12 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "shared-pod-storage.name" . }}
+      app.kubernetes.io/name: tests
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "shared-pod-storage.name" . }}
+        app.kubernetes.io/name: tests
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
@@ -30,13 +30,14 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           command: ["sh", "-c", "sh /scripts/run.sh"]
           volumeMounts:
-            - mountPath: /tmp
-              name: tmp
+            - mountPath: /var/nfs
+              name: nfs
             - mountPath: /scripts
               name: scripts
       volumes:
-      - name: tmp
-        emptyDir: {}
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: {{ include "shared-pod-storage.fullname" . }}
       - name: scripts
         configMap:
           name: {{ include "shared-pod-storage.fullname" . }}

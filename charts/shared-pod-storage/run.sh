@@ -1,25 +1,23 @@
 #!/usr/bin/env sh
 
-timeout=3
+timeout=10
 
-if [ ! -f /tmp/lock ]; then
+if [ ! -f /var/nfs/lock ]; then
   echo "locking"
-  touch /tmp/lock
-  if [ ! -f /tmp/counter ]; then
-    echo "1" > /tmp/counter
+  touch /var/nfs/lock
+  if [ ! -f /var/nfs/counter ]; then
+    echo "1" > /var/nfs/counter
   fi
   while true; do
-    counter=$(cat /tmp/counter)
-    echo "read counter: $counter"
-    ((counter=counter+1))
+    counter=$(cat /var/nfs/counter)
+    let counter++
     echo "incrementing counter: $counter"
-    echo $counter > /tmp/counter
-    echo "wrote counter: $(cat /tmp/counter)"
+    echo $counter > /var/nfs/counter
     sleep $timeout
   done
 else
   while true; do
-    echo "found counter: $(cat /tmp/counter)"
+    echo "found counter: $(cat /var/nfs/counter)"
     sleep $timeout
   done
 fi    

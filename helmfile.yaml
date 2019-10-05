@@ -8,7 +8,13 @@ helmDefaults:
   force: true
 
 releases:
+  - name: nfs-server-provisioner
+    installed: true
+    namespace: default
+    chart: ./charts/nfs-server-provisioner
+    values:
+      - values/nfs-server-provisioner.gotmpl
   - name: test-shared-pod-storage
     installed: true
-    namespace: test
+    namespace: default
     chart: ./charts/shared-pod-storage
