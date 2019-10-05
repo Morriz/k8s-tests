@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "shared-pod-storage.fullname" . }}
+  labels:
+    app: {{ template "shared-pod-storage.name" . }}
+    chart: {{ template "shared-pod-storage.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  run.sh: |
+    {{- .Files.Get "run.sh" | nindent 4 }}

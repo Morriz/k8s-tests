@@ -1,0 +1,18 @@
+{{- $ev := .Environment.Name }}
+helmDefaults:
+  tillerNamespace: tillerless
+  tillerless: true
+  atomic: true
+  wait: true
+  timeout: 600
+  force: true
+
+environments:
+  dev:
+    values: []
+    
+releases:
+  - name: test-shared-pod-storage
+    installed: true
+    namespace: test
+    chart: ./charts/shared-pod-storage
